@@ -12,7 +12,6 @@ wheels/
 # Virtual environments
 .venv
 
-data/cache
-data/training
+/data
 
 .DS_Store
