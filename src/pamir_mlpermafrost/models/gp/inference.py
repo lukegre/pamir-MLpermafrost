@@ -13,6 +13,9 @@ def predict(
     inference_batch_size=50_000,
     num_workers=5,
 ):
+
+    device = next(model.parameters()).device
+    
     # Make predictions on scaled inference data
     likelihood = model.likelihood
 
@@ -21,23 +24,28 @@ def predict(
 
     inference_batch_size = min(inference_batch_size, X_inference_tensor_scaled.shape[0])
 
+    print('preparing datasets')
     inference_dataset = TensorDataset(X_inference_tensor_scaled)
     inference_loader = DataLoader(
         inference_dataset,
         batch_size=inference_batch_size,
         num_workers=num_workers,
         shuffle=False,
+        pin_memory=True # Set to True for potentially faster data transfer to GPU
     )
-
+        
     predictions_mean_scaled = []
     predictions_variance_scaled = []
 
+    print('starting inference')
     with torch.no_grad(), gpytorch.settings.fast_pred_var():
         for i, (batch_x,) in enumerate(inference_loader):
+            batch_x = batch_x.to(device)
             observed_pred_inference = likelihood(model(batch_x))
-            predictions_mean_scaled.append(observed_pred_inference.mean)
-            predictions_variance_scaled.append(observed_pred_inference.variance)
-            print(f"Processed batch {i + 1}/{len(inference_loader)}", end="\r")
+            predictions_mean_scaled.append(observed_pred_inference.mean.cpu())
+            predictions_variance_scaled.append(observed_pred_inference.variance.cpu())
+            if not ((i + 1) % 10):
+                print(f"Processed batch {i + 1}/{len(inference_loader)}")
 
     # Concatenate predictions from all batches
     f_mean_inference_scaled = torch.cat(predictions_mean_scaled)

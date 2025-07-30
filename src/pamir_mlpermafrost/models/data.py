@@ -141,8 +141,7 @@ def process_X_data(
     return data_X
 
 
-def load_training_data(sel=None, target="ground_temp_2m"):
-    fname_data = "../data/training/training_data-k1500-pamir_ns180-expX.parquet"
+def load_training_data(fname_data="../data/training/training_data-k1500-pamir_ns180-expX.parquet", sel=None, target="ground_temp_2m"):
 
     if isinstance(target, str):
         target = [target]
