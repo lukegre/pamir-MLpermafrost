@@ -3,7 +3,7 @@ import numpy as np
 import torch
 from loguru import logger
 
-from ..data import StandardScaler_toTensor
+from ..datasets import StandardScaler_toTensor
 
 
 class GPMixedMean(gpytorch.models.ExactGP):

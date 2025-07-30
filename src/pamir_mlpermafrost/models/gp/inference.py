@@ -1,62 +1,62 @@
 import gpytorch
 import numpy as np
 import torch
-from torch.utils.data import DataLoader, TensorDataset
+from loguru import logger
+from torch.utils.data import DataLoader, Dataset
 
-from ..data import StandardScaler_toTensor
+from ..datasets import StandardScaler_toTensor
 
 
 def predict(
     model,
-    X_inference_tensor_scaled: torch.Tensor,
-    scaler_y,
-    inference_batch_size=50_000,
+    inference_dataset: Dataset,
+    scaler_y: StandardScaler_toTensor,
     num_workers=5,
 ):
-
     device = next(model.parameters()).device
-    
+
     # Make predictions on scaled inference data
     likelihood = model.likelihood
 
     model.eval()
     likelihood.eval()
 
-    inference_batch_size = min(inference_batch_size, X_inference_tensor_scaled.shape[0])
-
-    print('preparing datasets')
-    inference_dataset = TensorDataset(X_inference_tensor_scaled)
+    logger.info("Preparing datasets")
     inference_loader = DataLoader(
         inference_dataset,
-        batch_size=inference_batch_size,
-        num_workers=num_workers,
+        batch_size=1,
+        num_workers=3,
         shuffle=False,
-        pin_memory=True # Set to True for potentially faster data transfer to GPU
+        pin_memory=True,  # Set to True for potentially faster data transfer to GPU
     )
-        
+
     predictions_mean_scaled = []
     predictions_variance_scaled = []
 
-    print('starting inference')
+    logger.info("starting inference")
     with torch.no_grad(), gpytorch.settings.fast_pred_var():
         for i, (batch_x,) in enumerate(inference_loader):
             batch_x = batch_x.to(device)
             observed_pred_inference = likelihood(model(batch_x))
             predictions_mean_scaled.append(observed_pred_inference.mean.cpu())
             predictions_variance_scaled.append(observed_pred_inference.variance.cpu())
-            if not ((i + 1) % 10):
-                print(f"Processed batch {i + 1}/{len(inference_loader)}")
+
+            logging_message = f"Processed batch {i + 1}/{len(inference_loader)}"
+            if not ((i + 1) % 1):
+                logger.info(logging_message)
+            else:
+                logger.debug(logging_message)
 
     # Concatenate predictions from all batches
-    f_mean_inference_scaled = torch.cat(predictions_mean_scaled)
-    f_variance_inference_scaled = torch.cat(predictions_variance_scaled)
+    # f_mean_inference_scaled = torch.cat(predictions_mean_scaled)
+    # f_variance_inference_scaled = torch.cat(predictions_variance_scaled)
 
-    # Transform predictions back to original scale
-    f_mean_inference_original = scaler_y.inverse_transform(
-        f_mean_inference_scaled.reshape(-1, 1)
-    )
+    # # Transform predictions back to original scale
+    # f_mean_inference_original = scaler_y.inverse_transform(
+    #     f_mean_inference_scaled
+    # )
 
-    return f_mean_inference_original, f_variance_inference_scaled
+    return predictions_mean_scaled, predictions_variance_scaled
 
 
 def eval(

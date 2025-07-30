@@ -2,7 +2,7 @@ import gpytorch
 import numpy as np
 import torch
 
-from ..data import StandardScaler_toTensor
+from ..datasets import StandardScaler_toTensor
 
 
 class GPModel(gpytorch.models.ExactGP):
