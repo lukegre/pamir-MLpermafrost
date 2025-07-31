@@ -2,7 +2,7 @@ import sys
 
 from loguru import logger
 
-from . import data, models, viz
+from . import data, models, preprocessing, utils, viz
 
 logger_format = (
     "<green>{time:YYYY-MM-DD HH:mm:ss.SSS}</green> | "

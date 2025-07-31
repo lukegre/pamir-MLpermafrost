@@ -1,0 +1,13 @@
+
+services:
+
+  local-jupyter:
+    image: lukegre/jupyter-minimal:python3.12
+    container_name: renku-datascience
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8888:8888"
+    volumes:
+      - /Users/luke/Work/PAMIR/pamir-MLpermafrost:/home/vscode/work/pamir-MLpermafrost

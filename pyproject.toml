@@ -19,7 +19,7 @@ dependencies = [
     "pandas>=2.3.1",
     "pyarrow>=21.0.0",
     "python-dotenv>=1.1.1",
-    "rioxarray>=0.19.0",
+    "rioxarray",
     "s3fs>=2025.7.0",
     "scikit-learn>=1.7.1",
     "seaborn>=0.13.2",
