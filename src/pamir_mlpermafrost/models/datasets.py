@@ -155,7 +155,7 @@ class DatasetXarraySpatial(Dataset):
 
     def __getitem__(self, idx):
         ds = self._get_chunk(idx)
-        df = ds.to_dataframe()
+        df = ds.to_dataframe().fillna(0)
         X = self.chunk_processor(df)
         X_tensor_scaled = self.scaler.transform(X)
         return X_tensor_scaled
@@ -266,11 +266,9 @@ def process_X_data(
     return data_X
 
 
-def load_training_data(fname_data, sel=None, target="ground_temp_2m"):
+def process_training_data(df, sel=None, target="ground_temp_2m"):
     if isinstance(target, str):
         target = [target]
-
-    df = pd.read_parquet(fname_data)
 
     if sel is not None:
         df = df.loc[sel]

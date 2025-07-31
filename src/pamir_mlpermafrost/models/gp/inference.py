@@ -25,7 +25,7 @@ def predict(
     inference_loader = DataLoader(
         inference_dataset,
         batch_size=1,
-        num_workers=3,
+        num_workers=0,
         shuffle=False,
         pin_memory=True,  # Set to True for potentially faster data transfer to GPU
     )
@@ -38,8 +38,12 @@ def predict(
         for i, (batch_x,) in enumerate(inference_loader):
             batch_x = batch_x.to(device)
             observed_pred_inference = likelihood(model(batch_x))
+            
             predictions_mean_scaled.append(observed_pred_inference.mean.cpu())
             predictions_variance_scaled.append(observed_pred_inference.variance.cpu())
+            
+            del batch_x, observed_pred_inference
+            torch.cuda.empty_cache()
 
             logging_message = f"Processed batch {i + 1}/{len(inference_loader)}"
             if not ((i + 1) % 1):

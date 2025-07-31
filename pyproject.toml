@@ -10,6 +10,7 @@ requires-python = ">=3.12"
 dependencies = [
     "cryogrid-pytools>=0.3.18",
     "dask>=2025.7.0",
+    "fastparquet>=2024.11.0",
     "geopandas>=1.1.1",
     "gpytorch>=1.14",
     "ipykernel>=6.30.0",

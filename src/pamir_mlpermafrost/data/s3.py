@@ -11,7 +11,7 @@ assert dotenv.load_dotenv(_dotenv_path), (
 
 
 fsspec_kwargs = {
-    "s3": {"endpoint_url": dotenv.get_key(_dotenv_path, "S3_ENDPOINT_URL")},
+    "s3": {"endpoint_url": dotenv.get_key(_dotenv_path, "AWS_ENDPOINT_URL")},
     "simplecache": {
         "cache_storage": str(_base_path / "data/cache"),
         "asynchronous": True,
