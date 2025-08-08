@@ -13,7 +13,12 @@ class StandardScaler_toTensor(StandardScaler):
     inverse_transform (torch.Tensor --> pd.DataFrame | pd.Series | np.ndarray)
     """
 
-    def __init__(self, skip_columns: list[int] = [], **kwargs):
+    def __init__(
+        self,
+        skip_columns: list[int] = [],
+        save_path: str | pathlib.Path = None,
+        **kwargs,
+    ):
         """
         Initialize the StandardScaler_toTensor.
         transform (pd.DataFrame | pd.Series | np.ndarray --> torch.Tensor)
@@ -30,6 +35,7 @@ class StandardScaler_toTensor(StandardScaler):
         """
         super(StandardScaler_toTensor, self).__init__(**kwargs)
         self.skip_columns = skip_columns
+        self.save_path = save_path
 
     def fit(self, X, y=None):
         super(StandardScaler_toTensor, self).fit(X, y)
@@ -63,7 +69,7 @@ class StandardScaler_toTensor(StandardScaler):
             X_original = pd.Series(data=X_original, name=self.feature_names_in_)
         return X_original
 
-    def save_params(self, fname: str | pathlib.Path):
+    def save_params(self, fname: str | pathlib.Path = None):
         """
         Save the scaler parameters to a file.
 
@@ -73,16 +79,21 @@ class StandardScaler_toTensor(StandardScaler):
             The filename to save the scaler to.
         """
 
+        if fname is None:
+            if self.save_path is None:
+                raise ValueError("No filename provided and no save_path set.")
+            fname = self.save_path
+
         fname = str(fname)
 
         if not fname.endswith(".json"):
             raise ValueError("Filename must end with .json")
 
         params = {
-            "mean": self.mean_.tolist(),
-            "scale": self.scale_.tolist(),
-            "skip_columns": self.skip_columns,
-            "names": self.feature_names_in_,
+            "mean": [float(x) for x in self.mean_],
+            "scale": [float(x) for x in self.scale_],
+            "skip_columns": list(self.skip_columns),
+            "names": list(self.feature_names_in_),
         }
 
         with open(fname, "w") as f:

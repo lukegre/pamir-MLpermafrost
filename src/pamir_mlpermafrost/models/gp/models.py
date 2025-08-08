@@ -3,6 +3,8 @@ import numpy as np
 import torch
 from loguru import logger
 
+gpytorch.models.ApproximateGP
+
 from ...preprocessing.scalers import StandardScaler_toTensor
 
 
@@ -26,8 +28,30 @@ class GPModel(gpytorch.models.ExactGP):
         covar_x = self.covar_module(x)
         return gpytorch.distributions.MultivariateNormal(mean_x, covar_x)
 
+    def fit(self, train_x, train_y, optimizer, **kwargs):
+        """
+        Train the GP model on the provided training data.
+        """
+        from .train import train_mll
 
-class GPMixedMean(gpytorch.models.ExactGP):
+        model, scores = train_mll(self, train_x, train_y, optimizer, **kwargs)
+
+        return model, scores
+
+    def score(self, test_x, test_y, scaler_y: StandardScaler_toTensor):
+        from warnings import catch_warnings, simplefilter
+
+        from gpytorch.utils.warnings import GPInputWarning
+
+        from .eval import eval as evaluate
+
+        with catch_warnings():
+            simplefilter("ignore", category=GPInputWarning)
+
+            return evaluate(self, test_x, test_y, scaler_y)
+
+
+class GPMixedMean(GPModel):
     def __init__(self, train_x, train_y, likelihood, linear_mean_idx=[]):
         super().__init__(train_x, train_y, likelihood)
 
@@ -51,9 +75,8 @@ class GPMixedMean(gpytorch.models.ExactGP):
         return gpytorch.distributions.MultivariateNormal(mean_x, covar_x)
 
 
-class GPMixedMeanCatIndex(gpytorch.models.ExactGP):
+class GPMixedMeanCatIndex(GPModel):
     def __init__(self, train_x, train_y, likelihood, linear_mean_idx=[], cat_idx=[]):
-        print(train_x)
         super().__init__(train_x, train_y, likelihood)
 
         n_cols = train_x.shape[-1]

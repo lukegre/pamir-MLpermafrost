@@ -1,0 +1,49 @@
+defaults:
+- _self_
+- data: laptop
+- preprocessing: default
+- scalers: standard_scaler_to_tensor
+- model: gp_mixed_mean_cat_index
+- optimizer: adam
+
+target: permafrost_temperature
+features:
+- altitude
+- slope_angle
+- aspect_sin
+- aspect_cos
+- surface_index
+- albedo
+- emissivity
+- precipitation
+- temperature
+- snow_melt_doy
+- temp2m_DJF_q05
+- temp2m_JJA_q05
+- temp2m_MAM_q05
+- temp2m_SON_q05
+- temp2m_DJF_q50
+- temp2m_JJA_q50
+- temp2m_MAM_q50
+- temp2m_SON_q50
+- temp2m_DJF_q95
+- temp2m_JJA_q95
+- temp2m_MAM_q95
+- temp2m_SON_q95
+- precip_DJF_q50
+- precip_JJA_q50
+- precip_MAM_q50
+- precip_SON_q50
+- precip_DJF_q95
+- precip_JJA_q95
+- precip_MAM_q95
+- precip_SON_q95
+
+model_class: pamir_mlpermafrost.models.gp.models.GPMixedMeanCatIndex
+categorical: [ 4 ] # surface_index
+linear_mean: [ 0, 8 ] # altitude, temperature
+learning_rate: 0.01
+
+random_state: 42
+
+device: cpu

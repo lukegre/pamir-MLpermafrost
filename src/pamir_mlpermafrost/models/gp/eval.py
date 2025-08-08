@@ -38,11 +38,4 @@ def eval(
     r2 = r2_score(y_test, y_pred)
     mae = mean_absolute_error(y_test, y_pred)
 
-    print(f"Test Set Performance (Original Scale):")
-    print(f"MSE: {mse:.4f}")
-    print(f"RMSE: {np.sqrt(mse):.4f}")
-    print(f"MAE: {mae:.4f}")
-    print(f"R²: {r2:.4f}")
-    print(f"Predicted Std Dev: {y_pred_std.mean():.4f}")
-
-    return {"mse": mse, "rmse": np.sqrt(mse), "mae": mae, "r2": r2}, y_pred, y_pred_std
+    return {"mse": mse, "rmse": np.sqrt(mse), "mae": mae, "r2": r2}

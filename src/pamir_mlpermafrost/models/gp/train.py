@@ -10,8 +10,8 @@ def train_mll(
     model,
     X_train_scaled_tensor: torch.Tensor,
     y_train_scaled_tensor: torch.Tensor,
+    optimizer,
     n_iters=500,
-    learning_rate=0.02,
     patience=10,
     tolerance=1e-3,
 ):
@@ -28,10 +28,6 @@ def train_mll(
     model.train()
     likelihood.train()
 
-    # Better optimizer and learning rate
-    optimizer = torch.optim.Adam(
-        model.parameters(), lr=learning_rate
-    )  # Lower learning rate
     mll = gpytorch.mlls.ExactMarginalLogLikelihood(likelihood, model)
 
     prev_loss = float("inf")

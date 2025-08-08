@@ -1,0 +1,11 @@
+_target_: ${model_class}
+_partial_: true
+linear_mean_idx: ${linear_mean}
+cat_idx: ${categorical}
+likelihood:
+  _target_: gpytorch.likelihoods.GaussianLikelihood
+  noise_covar:
+    _target_: gpytorch.likelihoods.noise_models.HomoskedasticNoise
+    noise_constraint:
+      _target_: gpytorch.constraints.GreaterThan
+      lower_bound: 1e-4

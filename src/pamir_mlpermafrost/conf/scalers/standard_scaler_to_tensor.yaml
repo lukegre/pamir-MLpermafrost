@@ -1,0 +1,7 @@
+features:
+  _target_: pamir_mlpermafrost.preprocessing.scalers.StandardScaler_toTensor
+  skip_columns: ${categorical}
+
+target:
+  _target_: pamir_mlpermafrost.preprocessing.scalers.StandardScaler_toTensor
+  skip_columns: [] # No columns to skip for target

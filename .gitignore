@@ -18,3 +18,4 @@ wheels/
 .ipynb_checkpoints
 
 notebooks/experiments
+outputs

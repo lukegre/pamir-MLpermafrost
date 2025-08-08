@@ -1,0 +1,18 @@
+train_test_split:
+  _target_: sklearn.model_selection.train_test_split
+  _partial_: true
+  test_size: 0.2
+  random_state: ${random_state}
+  shuffle: true
+  stratify: null
+
+training:
+  _target_: pamir_mlpermafrost.data.processors.process_Xy
+  _partial_: true
+  features: ${features}
+  target: ${target}
+
+inference:
+  _target_: pamir_mlpermafrost.data.processors.process_X
+  _partial_: true
+  features: ${features}
