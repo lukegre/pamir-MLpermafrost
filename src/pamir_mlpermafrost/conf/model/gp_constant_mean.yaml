@@ -1,0 +1,2 @@
+_target_: pamir_mlpermafrost.models.gp.models.GPCustomCovar
+_partial_: true

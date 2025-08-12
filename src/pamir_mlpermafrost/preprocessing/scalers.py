@@ -89,18 +89,29 @@ class StandardScaler_toTensor(StandardScaler):
         if not fname.endswith(".json"):
             raise ValueError("Filename must end with .json")
 
-        params = {
-            "mean": [float(x) for x in self.mean_],
-            "scale": [float(x) for x in self.scale_],
-            "skip_columns": list(self.skip_columns),
-            "names": list(self.feature_names_in_),
-        }
+        params = self.to_dict()
 
         with open(fname, "w") as f:
             json.dump(
                 params,
                 f,
             )
+
+    def to_dict(self):
+        """
+        Convert the scaler parameters to a dictionary.
+
+        Returns
+        -------
+        dict
+            A dictionary containing the scaler parameters.
+        """
+        return {
+            "mean": [float(x) for x in self.mean_],
+            "scale": [float(x) for x in self.scale_],
+            "skip_columns": list(self.skip_columns),
+            "names": list(self.feature_names_in_),
+        }
 
     @classmethod
     def from_params_file(cls, fname: str):

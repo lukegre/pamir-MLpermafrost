@@ -2,7 +2,7 @@ train_test_split:
   _target_: sklearn.model_selection.train_test_split
   _partial_: true
   test_size: 0.2
-  random_state: ${random_state}
+  random_state: ${seed}
   shuffle: true
   stratify: null
 

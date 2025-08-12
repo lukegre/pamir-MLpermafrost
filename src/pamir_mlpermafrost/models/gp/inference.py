@@ -11,7 +11,7 @@ def predict(
     model,
     inference_dataset: Dataset,
     scaler_y: StandardScaler_toTensor,
-    num_workers=4,
+    num_workers=0,
 ):
     device = next(model.parameters()).device
 
@@ -27,7 +27,6 @@ def predict(
         batch_size=1,
         num_workers=num_workers,
         shuffle=False,
-        prefetch_factor=2,
     )
 
     predictions_mean_scaled = []

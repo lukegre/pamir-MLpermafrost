@@ -3,9 +3,10 @@ import numpy as np
 import torch
 from loguru import logger
 
-gpytorch.models.ApproximateGP
-
 from ...preprocessing.scalers import StandardScaler_toTensor
+
+DEFAULT_GaussianLikelihood = gpytorch.likelihoods.GaussianLikelihood()
+DEFAULT_RBFKernel = gpytorch.kernels.ScaleKernel(gpytorch.kernels.RBFKernel())
 
 
 class GPModel(gpytorch.models.ExactGP):
@@ -116,6 +117,27 @@ class GPMixedMeanCatIndex(GPModel):
         x_constant = x[..., self.idx_constant]
 
         mean_x = self.linear_mean(x_linear) + self.constant_mean(x_constant)
+        covar_x = self.covar_module(x)
+
+        return gpytorch.distributions.MultivariateNormal(mean_x, covar_x)
+
+
+class GPCustomCovar(GPModel):
+    def __init__(
+        self,
+        train_x,
+        train_y,
+        likelihood=DEFAULT_GaussianLikelihood,
+        covar_module=DEFAULT_RBFKernel,
+    ):
+        super().__init__(train_x, train_y, likelihood)
+
+        # constructing the mean modules
+        self.constant_mean = gpytorch.means.ConstantMean()
+        self.covar_module = covar_module
+
+    def forward(self, x):
+        mean_x = self.constant_mean(x)
         covar_x = self.covar_module(x)
 
         return gpytorch.distributions.MultivariateNormal(mean_x, covar_x)

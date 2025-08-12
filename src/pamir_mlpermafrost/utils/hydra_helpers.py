@@ -2,8 +2,9 @@ from dataclasses import dataclass
 from typing import Callable, Dict, Literal
 
 from gpytorch.models.exact_gp import ExactGP
-from hydra.core.config_store import ConfigStore
 from omegaconf import OmegaConf
+
+from hydra.core.config_store import ConfigStore
 
 from ..models.gp.models import GPModel
 from ..preprocessing.scalers import StandardScaler_toTensor
@@ -47,8 +48,9 @@ def process_config(cfg: PamirConfig) -> PamirConfig:
     Process the PamirConfig to ensure all fields are properly initialized.
     This can include setting defaults or validating values.
     """
-    from hydra.utils import instantiate
     from munch import munchify
+
+    from hydra.utils import instantiate
 
     from .config import MunchRich
 
@@ -66,6 +68,7 @@ def get_class_name(class_path: str) -> str:
 def get_hash(text: str) -> str:
     import hashlib
 
+    text = str(text)
     hash_object = hashlib.sha1(text.encode())
     return hash_object.hexdigest()[:8]  # Return the first 8 characters
 

@@ -1,0 +1,22 @@
+#
+# ( Poly + RBF ) * Index
+
+_target_: gpytorch.kernels.ProductKernel
+_partial_: true
+_args_:
+- _target_: gpytorch.kernels.AdditiveKernel
+  _args_:
+  - _target_: gpytorch.kernels.ScaleKernel
+    base_kernel:
+      _target_: gpytorch.kernels.PolynomialKernel
+      power: 1
+      active_dims: ${idx_linear}
+  - _target_: gpytorch.kernels.ScaleKernel
+    base_kernel:
+      _target_: gpytorch.kernels.RBFKernel
+      active_dims: ${idx_rbf}
+      ard_num_dims: ${num_rbf}
+      # ard_num_dims must equal length of active_dims (numeric features)
+- _target_: gpytorch.kernels.IndexKernel
+  num_tasks: ${num_categories}
+  active_dims: ${idx_categorical}

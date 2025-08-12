@@ -12,21 +12,9 @@ In this section, I try to implement what I learnt in [1_learning_about_GPs](../1
 
 ## Notebooks
 
-### [0_choosing_target_variable.ipynb](./0_choosing_target_variable.ipynb)
-
-The first thing we have to do is re-assess the target variable (permafrost temperature), since it seems that there are many points that are shown as being permafrost, but are actually not (mean ground temperatures at all levels are > 0).
-
-<div style="background-color:rgb(245, 210, 152); padding: 10px; border-radius: 10px;">
-<b>UPDATE:</b> Looking at the data again, there doesn't seem much sense in predicting permafrost temperature, since it is not a continuous variable, which adds complexity. Thus predicting ground temperature at 2, 5, 10 m may be a better option for now.
-</div>
-
-<div style='padding:6px 15px; margin:10px 0px; background: #a2e8b5; border-radius: 10px;'>
-<i>FUTURE IDEA:</i> Predicting seasonal ground temperatures instead of annual mean. Choose coldest period and warmest period.</div>
-
-
-### [1_modelling_ground_temp.ipynb](./1_modelling_ground_temp.ipynb)
-Implement a separate GPs for each of the ground temperature levels (2, 5, 10 m).
-Be sure to scale the input temperature to the `precip_scaling` parameters set for each of the experiments.
+### [0_modelling_ground_temp.ipynb](./0_modelling_ground_temp.ipynb)
+Implement a separate GPs for each of the ground temperature depths and season.
+Be sure to scale the input temperature to the `precip_scaling` parameters set for each of the experiments (done in [2_data_prep/1_profile_prep.ipynb](../2_data_prep/1_profile_prep.ipynb)).
 
 #### GP setup
 - [ ] `ConstantMean`: for all features
@@ -40,4 +28,6 @@ Be sure to scale the input temperature to the `precip_scaling` parameters set fo
 
 
 <div style='padding:6px 15px; margin:10px 0px; background: #a2e8b5; border-radius: 10px;'>
-<i>FUTURE IDEA:</i> At the moment, we're predicting a single temperature level, but it could also be possible to predict the entire temperature profile (e.g., at <code>0:0.25:5 + 5:1:20</code> resolution) simultaneously using a multi-output model. We could then have different models for winter / summer periods to help get to ALT predictions. </div>
+<i>FUTURE IDEA:</i> Predict depths of the temperature profile <code>[0.25, 0.5, 0.75., 1, 1.5, 2.0, 3, 5, 7, 10, 15, 20]</code> simultaneously using multi-output model. We could then have different models for winter / summer periods to help get to ALT predictions. </div>
+<div style='padding:6px 15px; margin:10px 0px; background: #a2e8b5; border-radius: 10px;'>
+<i>FUTURE IDEA:</i> Treat depth as a feature rather than one of the columns. Treat season as a categorical feature. One model that can estimate temperature for any profile. </div>

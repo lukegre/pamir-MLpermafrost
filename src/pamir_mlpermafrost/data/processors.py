@@ -35,7 +35,7 @@ def process_X(df: pd.DataFrame, features: tuple[str, ...]) -> pd.DataFrame:
     if has_aspect or has_cos_sin:
         df = df.pipe(calc_aspect_cos_sin)
 
-    data_X = df[features]
+    data_X = df[features].fillna(0)
 
     return data_X
 

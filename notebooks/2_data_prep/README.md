@@ -32,3 +32,7 @@ Below is an example of what this shift looks like for profile 10463.
 <img src="./imgs/temp_profile_10463.png" style="width: 90%">
 
 Our goal will be to predict temperature at [1, 2, 3, 5, 7, 10, 15] m for selected profiles from each season. E.g., 90th quantile in summer, 10th quantile in winter, 50th quantile in autumn and spring, etc.
+
+<div style="background-color:rgb(245, 210, 152); padding: 10px; border-radius: 10px;">
+<b>UPDATE:</b> Will stick to predicting the quantile for each season rather than the more extreme temperatures. This avoids having to deal with the shift, and seems more representative. This will already be an improvement on the annual mean temperature. Depths will be 0.25, 0.5, 0.75, 1, 2, 3, 5, 7, 10, 15, 20 m.
+</div>
