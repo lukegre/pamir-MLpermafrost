@@ -41,19 +41,15 @@ def main(cfg):
     
     g = set_seed(cfg.seed)
 
-    with mlflow.start_run(
-        run_name=cfg.mlflow.run_name,
-        nested=cfg.mlflow.nested,
-        log_system_metrics=True,
-    ) as run:
+    with mlflow.start_run(run_name=cfg.mlflow.run_name) as run:
         output_dir = pathlib.Path(run.info.artifact_uri.replace("file://", ""))
 
         mlflow.log_params(cfg.toDict())
         mlflow.log_artifacts(pathlib.Path(cfg.run_dir) / ".hydra", "hydra")
 
         train_X, train_y, test_X, test_y, scaler_X, scaler_y = load_training_data(cfg)
-        scaler_X.save_params(output_dir / "scaler_X.json")
-        scaler_y.save_params(output_dir / "scaler_y.json")
+        mlflow.log_dict(scaler_X.to_dict(), "scaler_X.json")
+        mlflow.log_dict(scaler_y.to_dict(), "scaler_y.json")
 
         model = cfg.model(
             train_X,
@@ -70,20 +66,24 @@ def main(cfg):
             patience=10,
             tolerance=1e-3,
         )
-        torch.save(model.state_dict(), output_dir / "model_state.pt")
-
         scores = evaluate_model(model, train_X, train_y, test_X, test_y, scaler_y)
-        scores.to_json(output_dir / "scores.json", indent=2)
+
+        torch.save(model.state_dict(), output_dir / "model_state.pt")
+        mlflow.pytorch.log_model(model)
+
+        rbf_lengthscales = get_rbf_lengthscales(model, cfg.features)
+        mlflow.log_dict(rbf_lengthscales, "rbf_lengthscales_trained.json")
 
         output = inference(
             model,
             scaler_X,
             scaler_y,
             cfg,
-            isel_subset={"y": slice(2800, 3300), "x": slice(1400, 2500)},
+            # isel_subset={"y": slice(2800, 3300), "x": slice(1400, 2500)},
         )
 
         plot_results(output)
+        log_netcdf(output, cfg)
 
 
 def load_training_data(cfg):
@@ -142,7 +142,7 @@ def inference(
     scaler_y,
     cfg,
     isel_subset: dict = {},
-    chunksizes: dict = {"x": 500, "y": 500},
+    chunksizes: dict = {"x": 450, "y": 450},
 ):
     from functools import partial
 
@@ -231,6 +231,34 @@ def set_seed(seed: int = 42) -> torch.Generator:
     g = torch.Generator()
     g.manual_seed(seed)
     return g
+
+
+def log_netcdf(ds:xr.Dataset, cfg):
+    from tempfile import TemporaryDirectory
+    from pathlib import Path
+    import mlflow
+
+    ds = ds[['yhat_avg', 'yhat_std']]
+    ds = ds.rename(
+        yhat_avg=f"yhat_avg_{cfg.target}",
+        yhat_std=f"yhat_std_{cfg.target}")
+    ds = ds.astype('float32')
+
+    for key in ds:
+        da = ds[[key]]
+        enc = {v: {"zlib": True, "complevel": 4} for v in ds.data_vars}  # optional compression
+        with TemporaryDirectory() as td:
+            path = Path(td) / f"output_{key}.nc"
+            da.to_netcdf(path, engine="h5netcdf", encoding=enc)  # triggers dask compute if needed
+            mlflow.log_artifact(str(path), artifact_path="results")
+
+
+def get_rbf_lengthscales(model, features:list[str], kernel_trace='covar_module.kernels.0.kernels.1.base_kernel')->dict:
+    features = np.array(features)
+    state_dict = model.state_dict()
+    rbf_lengthscales = state_dict[kernel_trace + '.raw_lengthscale'].cpu().numpy().squeeze()
+    rbf_columns = features[state_dict[kernel_trace + '.active_dims'].cpu().numpy().squeeze()]
+    return dict(zip(rbf_columns, rbf_lengthscales))
 
 
 if __name__ == "__main__":

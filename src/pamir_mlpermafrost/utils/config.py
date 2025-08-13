@@ -1,6 +1,7 @@
 import hydra
 import munch
 from omegaconf import OmegaConf
+from loguru import logger
 
 
 class MunchRich(munch.Munch):
@@ -22,8 +23,30 @@ def load_hydra_config(config_dir: str, config_name: str, overrides=[]) -> munch.
     ):
         params = hydra.compose(config_name=config_name, overrides=overrides)
 
+    if in_jupyter_notebook():
+        logger.warning('Will pop `run_dir` since detected in Notebook and cant be resolved')
+        params.__dict__['_content'].pop('run_dir')
+        
     params = OmegaConf.to_container(params, resolve=True)
     params = hydra.utils.instantiate(params)
     params = munch.munchify(params, factory=MunchRich)
 
     return params
+
+
+def in_jupyter_notebook() -> bool:
+    try:
+        from IPython import get_ipython
+        shell = get_ipython().__class__.__name__
+        if shell == 'ZMQInteractiveShell':
+            # Jupyter notebook or qtconsole
+            return True
+        elif shell == 'TerminalInteractiveShell':
+            # Terminal running IPython
+            return False
+        else:
+            # Other type (maybe in Spyder, etc.)
+            return False
+    except (NameError, ImportError):
+        # Not running in IPython at all
+        return False

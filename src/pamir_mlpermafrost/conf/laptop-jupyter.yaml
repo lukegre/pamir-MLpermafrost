@@ -4,8 +4,8 @@ defaults:
 - preprocessing: default
 - scalers: standard_scaler_to_tensor
 - optimizer: adam
-- covar_module: poly1_rbf-index
-- likelihood: gaussian_int_02_5
+- covar_module: poly1_rbf_index
+- likelihood: gaussian_gt02lt5
 - model: gp_constant_mean
 
 target: ground_tempJAS_20
@@ -48,19 +48,17 @@ idx_categorical: [ 4 ] # surface_index
 num_categories: 5
 
 seed: 60
-learning_rate: 0.2
+learning_rate: 0.1
 device: cuda
 
 run_dir: ${hydra:runtime.output_dir}
 
 mlflow:
+  experiment_name: mlflow_testing
+  run_name: ${target}-x${hash:${features}}-covar_${hydra:runtime.choices.covar_module}-likelihood_${hydra:runtime.choices.likelihood}-opt_${hydra:runtime.choices.optimizer}_lr${learning_rate}-seed${seed}
   tracking_uri: file:./mlruns
-  experiment_name: model_${hash:${model}}_plottest
-  run_name: ${target}-x${hash:${features}}-cov${hash:${covar_module}}-llh${hash:${likelihood}}-lr${learning_rate}-seed${seed}
   nested: false
 
 hydra:
   run:
     dir: hydra/runs/${mlflow.experiment_name}/${mlflow.run_name}
-  sweep:
-    dir: hydra/multiruns/${mlflow.experiment_name}/${mlflow.run_name}

@@ -6,7 +6,6 @@ from omegaconf import OmegaConf
 
 from hydra.core.config_store import ConfigStore
 
-from ..models.gp.models import GPModel
 from ..preprocessing.scalers import StandardScaler_toTensor
 
 
