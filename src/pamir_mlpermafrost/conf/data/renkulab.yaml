@@ -1,0 +1,18 @@
+training:
+  load:
+    _target_: pandas.read_parquet
+    _partial_: true
+    path: s3://spi-pamir-cryogrid/pamir-MLpermafrost/data-training/training_data-k1500-pamir_ns180-expX-ground_temp_seas_depth.parquet
+    engine: pyarrow
+    storage_options:
+      s3: 
+        endpoint_url: https://os.zhdk.cloud.switch.ch
+
+inference:
+  load:
+    _target_: xarray.open_zarr
+    _partial_: true
+    store: s3://spi-pamir-cryogrid/pamir-MLpermafrost/data-inference/inference_variables-710w365s750e400n-100m.zarr/
+    storage_options:
+      s3: 
+        endpoint_url: https://os.zhdk.cloud.switch.ch

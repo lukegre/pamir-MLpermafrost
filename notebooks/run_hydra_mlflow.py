@@ -1,37 +1,45 @@
 import pathlib
 
+import hydra
 import matplotlib.pyplot as plt
 import mlflow
 import numpy as np
 import pandas as pd
+import random
 import torch
 import xarray as xr
+import warnings
+import pamir_mlpermafrost as pamir
 from rich import print
 
-import hydra
-import pamir_mlpermafrost as pamir
+
+warnings.filterwarnings(
+    "ignore",
+    category=UserWarning,
+    module="linear_operator.utils.interpolation|numcodecs"
+)
 
 PLOT_VARS = {
-    "yhat_avg": dict(robust=True, cmap="RdBu_r", center=0),
-    "yhat_std": dict(robust=True),
-    "temperature": dict(robust=True, cmap="RdBu_r", center=273.15),
-    "altitude": dict(robust=True, cmap="terrain"),
-    "aspect": dict(cmap="twilight_r"),
-    "surface_index": dict(robust=True, cmap="turbo", vmin=0, vmax=5),
+    "yhat_avg": dict(cmap="RdBu_r", vmin=-10, vmax=10),
+    "yhat_std": dict(vmin=0, vmax=3.5),
+    # "temperature": dict(robust=True, cmap="RdBu_r", center=273.15),
+    # "altitude": dict(robust=True, cmap="terrain"),
+    # "aspect": dict(cmap="twilight_r"),
+    # "surface_index": dict(robust=True, cmap="turbo", vmin=0, vmax=5),
 }
-
 
 @hydra.main(
     version_base=None,
     config_path="../src/pamir_mlpermafrost/conf",
-    config_name="laptop-jupyter",
-)
+    config_name="laptop-jupyter")
 def main(cfg):
     # --- MLflow setup ---
     mlflow.set_tracking_uri(cfg.mlflow.tracking_uri)  # e.g. "file:./mlruns" or http uri
     mlflow.set_experiment(cfg.mlflow.experiment_name)
 
     cfg = pamir.utils.process_hydra_config(cfg)
+    
+    g = set_seed(cfg.seed)
 
     with mlflow.start_run(
         run_name=cfg.mlflow.run_name,
@@ -75,10 +83,7 @@ def main(cfg):
             isel_subset={"y": slice(2800, 3300), "x": slice(1400, 2500)},
         )
 
-        fig, axs = plot_results(output)
-        fig.savefig(
-            output_dir / "results.png", bbox_inches="tight", dpi=120, transparent=True
-        )
+        plot_results(output)
 
 
 def load_training_data(cfg):
@@ -107,10 +112,10 @@ def load_training_data(cfg):
     test_y_scaled = scaler_y.transform(test_y.to_frame()).squeeze()
 
     return (
-        train_X_scaled,
-        train_y_scaled,
-        test_X_scaled,
-        test_y_scaled,
+        train_X_scaled.to(cfg.device),
+        train_y_scaled.to(cfg.device),
+        test_X_scaled.to(cfg.device),
+        test_y_scaled.to(cfg.device),
         scaler_X,
         scaler_y,
     )
@@ -137,7 +142,7 @@ def inference(
     scaler_y,
     cfg,
     isel_subset: dict = {},
-    chunksizes: dict = {"x": 250, "y": 250},
+    chunksizes: dict = {"x": 500, "y": 500},
 ):
     from functools import partial
 
@@ -170,22 +175,62 @@ def inference(
 
 
 def plot_results(ds):
-    n_vars = len(PLOT_VARS)
-    n_col = 3
-    n_row = (n_vars + n_col - 1) // n_col  # Calculate number of rows needed
-    figsize = (n_col * 4 + 2, n_row * 2 + 0.5)
+    
+    mlflow.tracking.multimedia.COMPRESSED_IMAGE_SIZE = 512
 
-    fig, axs = plt.subplots(
-        n_row, n_col, figsize=figsize, sharex=True, sharey=True, dpi=200
-    )
+    pixel_aspect = 1 / np.sin(np.deg2rad(ds.y.mean().item()))
+    fig_aspect = pixel_aspect * 1.2
+    fig_w = 10
+    fig_h = fig_w / fig_aspect
 
-    for key, ax in zip(PLOT_VARS.keys(), axs.flat):
+    for i, key in enumerate(PLOT_VARS.keys()):
         da = ds[key]
         props = PLOT_VARS[key]
-        da.plot.imshow(ax=ax, **props)
+        
+        fig, axs = plt.subplots(figsize=(fig_w, fig_h), dpi=150)
+        da.plot.imshow(ax=axs, **props)
+        fig.tight_layout()
+        image = fig_to_pilimage(fig)
+        mlflow.log_image(image, key='images', step=i)
 
-    fig.tight_layout()
-    return fig, axs
+
+def fig_to_pilimage(fig):
+    """
+    Convert a matplotlib figure to a PIL image.
+    """
+    from io import BytesIO
+    from PIL import Image
+
+    buf = BytesIO()
+    fig.savefig(buf, format='png')
+    buf.seek(0)
+    img = Image.open(buf)
+    return img
+
+
+def set_seed(seed: int = 42) -> torch.Generator:
+    """
+    Set seeds for reproducibility across Python, NumPy, PyTorch (CPU + GPU).
+
+    Returns:
+        torch.Generator: a seeded torch generator for use in DataLoader or elsewhere.
+    """
+    import os 
+
+    os.environ["PYTHONHASHSEED"] = str(seed)
+    random.seed(seed)
+    np.random.seed(seed)
+
+    torch.manual_seed(seed)
+    torch.cuda.manual_seed(seed)
+    torch.cuda.manual_seed_all(seed)
+
+    torch.backends.cudnn.deterministic = True
+    torch.backends.cudnn.benchmark = False
+
+    g = torch.Generator()
+    g.manual_seed(seed)
+    return g
 
 
 if __name__ == "__main__":

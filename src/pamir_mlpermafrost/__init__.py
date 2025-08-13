@@ -22,5 +22,5 @@ logger_format = (
 )
 
 logger.remove()
-logger.add(sys.stderr, level="DEBUG", format=logger_format)
+logger.add(sys.stderr, level="INFO", format=logger_format)
 logger.level("DEBUG", color="<blue><dim>")

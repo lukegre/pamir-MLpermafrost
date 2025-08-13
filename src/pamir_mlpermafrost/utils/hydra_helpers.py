@@ -33,14 +33,19 @@ class Preprocessing:
 class PamirConfig:
     target: str
     features: list[str]
-    linear_mean: list[int]
-    categorical: list[int]
-    random_seed: int
+    idx_rbf: list[int]
+    num_rbf: int
+    idx_linear: list[int]
+    idx_categorical: list[int]
+    num_categories: int
+    seed: int
+    learning_rate: float
     scalers: Scalers
     data: Data
     preprocessing: Preprocessing
     output_dir: str
     device: str  # e.g., 'cpu' or 'cuda:0'
+    mlflow: dict
 
 
 def process_config(cfg: PamirConfig) -> PamirConfig:

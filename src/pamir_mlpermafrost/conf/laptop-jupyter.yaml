@@ -1,6 +1,6 @@
 defaults:
 - _self_
-- data: laptop-ground_temp_seasonal
+- data: renkulab
 - preprocessing: default
 - scalers: standard_scaler_to_tensor
 - optimizer: adam
@@ -47,22 +47,17 @@ idx_linear: [ 0, 8 ] # altitude, temperature
 idx_categorical: [ 4 ] # surface_index
 num_categories: 5
 
-seed: 32
-learning_rate: 0.01
-device: cpu
+seed: 60
+learning_rate: 0.2
+device: cuda
 
 run_dir: ${hydra:runtime.output_dir}
 
 mlflow:
   tracking_uri: file:./mlruns
-  experiment_name: model_${hash:${model}}
-  run_name: y_${target}-x_${hash:${features}}-covar${hash:${covar_module}}-likeli${hash:${likelihood}}-opt${hash:${optimizer}}-seed${seed}
+  experiment_name: model_${hash:${model}}_plottest
+  run_name: ${target}-x${hash:${features}}-cov${hash:${covar_module}}-llh${hash:${likelihood}}-lr${learning_rate}-seed${seed}
   nested: false
-
-wandb:
-  run_name: y_${target}-x_${hash:${features}}-covar${hash:${covar_module}}-likeli${hash:${likelihood}}-opt${hash:${optimizer}}-seed${seed}
-  project: pamir-mlpermafrost
-  entity: luke-gregor-swiss-data-science-center
 
 hydra:
   run:
