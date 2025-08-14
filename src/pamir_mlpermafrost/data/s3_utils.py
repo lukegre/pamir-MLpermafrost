@@ -43,5 +43,6 @@ def get_fsspec_simplecache_kwargs():
         "simplecache": {
             "cache_storage": str(_base_path / "data/cache"),
             "asynchronous": True,
+            "cache_check": True,  # Check if the cache is valid before using it
         }
     }

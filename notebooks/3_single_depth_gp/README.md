@@ -31,3 +31,6 @@ Be sure to scale the input temperature to the `precip_scaling` parameters set fo
 <i>FUTURE IDEA:</i> Predict depths of the temperature profile <code>[0.25, 0.5, 0.75., 1, 1.5, 2.0, 3, 5, 7, 10, 15, 20]</code> simultaneously using multi-output model. We could then have different models for winter / summer periods to help get to ALT predictions. </div>
 <div style='padding:6px 15px; margin:10px 0px; background: #a2e8b5; border-radius: 10px;'>
 <i>FUTURE IDEA:</i> Treat depth as a feature rather than one of the columns. Treat season as a categorical feature. One model that can estimate temperature for any profile. </div>
+
+
+Modelling is done using the script [`../run_hydra_mlflow.py`](../run_hydra_mlflow.py). See the config file [`laptop-jupyter.yaml`](../../src/pamir_mlpermafrost/conf/laptop-jupyter.yaml) for configuration tions.
