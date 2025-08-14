@@ -178,13 +178,15 @@ def plot_results(ds):
     
     mlflow.tracking.multimedia.COMPRESSED_IMAGE_SIZE = 512
 
-    pixel_aspect = 1 / np.sin(np.deg2rad(ds.y.mean().item()))
-    fig_aspect = pixel_aspect * 1.2
+    mask = ds.surface_index > 0
+
+    pixel_aspect = 1 / np.cos(np.deg2rad(ds.y.mean().item()))
+    fig_aspect = pixel_aspect * 1.1
     fig_w = 10
     fig_h = fig_w / fig_aspect
 
     for i, key in enumerate(PLOT_VARS.keys()):
-        da = ds[key]
+        da = ds[key].where(mask)
         props = PLOT_VARS[key]
         
         fig, axs = plt.subplots(figsize=(fig_w, fig_h), dpi=150)
@@ -246,10 +248,10 @@ def log_netcdf(ds:xr.Dataset, cfg):
 
     for key in ds:
         da = ds[[key]]
-        enc = {v: {"zlib": True, "complevel": 4} for v in ds.data_vars}  # optional compression
+        enc = {v: {"zlib": True, "complevel": 4} for v in da.data_vars}  # optional compression
         with TemporaryDirectory() as td:
             path = Path(td) / f"output_{key}.nc"
-            da.to_netcdf(path, engine="h5netcdf", encoding=enc)  # triggers dask compute if needed
+            da.to_netcdf(path, engine="h5netcdf", encoding=enc)  
             mlflow.log_artifact(str(path), artifact_path="results")
 
 
