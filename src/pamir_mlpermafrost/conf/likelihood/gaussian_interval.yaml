@@ -1,0 +1,6 @@
+_target_: gpytorch.likelihoods.GaussianLikelihood
+_partial_: true
+noise_constraint:
+  _target_: gpytorch.constraints.Interval
+  lower_bound: ${likelihood_noise_lower}
+  upper_bound: ${likelihood_noise_upper}

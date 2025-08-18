@@ -6,7 +6,7 @@ _args_:
 - _target_: gpytorch.kernels.AdditiveKernel
   _args_:
   - _target_: gpytorch.kernels.PolynomialKernel
-    power: ${poly_power}
+    power: 2
     active_dims: ${idx_linear}
     offset_prior:
       _target_: gpytorch.priors.NormalPrior
@@ -14,7 +14,7 @@ _args_:
       scale: 1.0
   - _target_: gpytorch.kernels.ScaleKernel
     base_kernel:
-      _target_: gpytorch.kernels.RBFKernel
+      _target_: gpytorch.kernels.RQKernel
       active_dims: ${idx_rbf}
       ard_num_dims: ${num_rbf}
       lengthscale_prior:
