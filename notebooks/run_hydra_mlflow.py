@@ -31,7 +31,7 @@ PLOT_VARS = {
 @hydra.main(
     version_base=None,
     config_path="../src/pamir_mlpermafrost/conf",
-    config_name="laptop-jupyter")
+    config_name="gp_split_rbf")
 def main(cfg):
     # --- MLflow setup ---
     mlflow.set_tracking_uri(cfg.mlflow.tracking_uri)  # e.g. "file:./mlruns" or http uri
@@ -71,8 +71,8 @@ def main(cfg):
         torch.save(model.state_dict(), output_dir / "model_state.pt")
         mlflow.pytorch.log_model(model)
 
-        rbf_lengthscales = get_rbf_lengthscales(model, cfg.features)
-        mlflow.log_dict(rbf_lengthscales, "rbf_lengthscales_trained.json")
+        # rq_lengthscales = get_rbf_lengthscales(model, cfg.features, kernel_trace='covar_module.kernels.0.kernels.1.base_kernel')
+        # mlflow.log_dict(rq_lengthscales, "rq_lengthscales_trained.json")
 
         output = inference(
             model,
@@ -142,7 +142,7 @@ def inference(
     scaler_y,
     cfg,
     isel_subset: dict = {},
-    chunksizes: dict = {"x": 450, "y": 450},
+    chunksizes: dict = {"x": 300, "y": 300},
 ):
     from functools import partial
 

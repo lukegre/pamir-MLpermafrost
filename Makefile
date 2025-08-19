@@ -7,6 +7,13 @@ name ?= $(notdir $(shell pwd))
 new-notebook:  ## creates a new notebook from the template. set name variable to give a non-default name
 	@cp -r notebooks/.template.ipynb notebooks/$(name).ipynb
 
+env:  ## sets everything up when running on a renkulab session
+	@pip3 install uv
+	@uv sync
+
+mlfow-ui: env  ## runs an mlflow ui server ensuring that env is set up
+	@uv run mlflow ui
+
 jupyter-kernel:  ## creates a jupyter-notebook kernel for this project
 	@uv sync
 	@uv run ipython kernel install --user --env VIRTUAL_ENV $(pwd)/.venv --name=$(name)

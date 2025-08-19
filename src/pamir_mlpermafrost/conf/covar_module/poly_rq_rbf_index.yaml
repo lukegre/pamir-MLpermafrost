@@ -1,0 +1,54 @@
+#
+# ( Poly + RQ_core + RQ(temp/precip) + (RQ(core) * RQ(temp/precip)) ) * Index
+_target_: gpytorch.kernels.ProductKernel
+_partial_: true
+_args_:
+- _target_: gpytorch.kernels.AdditiveKernel
+  _args_:
+  - _target_: gpytorch.kernels.PolynomialKernel
+    power: ${poly_power}
+    active_dims: ${idx_poly}
+    offset_prior:
+      _target_: gpytorch.priors.NormalPrior
+      loc: 0.0
+      scale: 1.0
+  - _target_: gpytorch.kernels.ScaleKernel
+    base_kernel:
+      _target_: gpytorch.kernels.RQKernel
+      active_dims: ${idx_1}
+      ard_num_dims: ${num_1}
+      lengthscale_prior:
+        _target_: gpytorch.priors.GammaPrior
+        concentration: 2.0
+        rate: 1.0
+  - _target_: gpytorch.kernels.ScaleKernel
+    base_kernel:
+      _target_: gpytorch.kernels.RQKernel
+      active_dims: ${idx_2}
+      lengthscale_prior:
+        _target_: gpytorch.priors.GammaPrior
+        concentration: 2.0
+        rate: 1.0
+  - _target_: gpytorch.kernels.ProductKernel
+    _args_:
+    - _target_: gpytorch.kernels.ScaleKernel
+      base_kernel:
+        _target_: gpytorch.kernels.RQKernel
+        active_dims: ${idx_1}
+        ard_num_dims: ${num_1}
+        lengthscale_prior:
+          _target_: gpytorch.priors.GammaPrior
+          concentration: 2.0
+          rate: 1.0
+    - _target_: gpytorch.kernels.ScaleKernel
+      base_kernel:
+        _target_: gpytorch.kernels.RQKernel
+        active_dims: ${idx_2}
+        lengthscale_prior:
+          _target_: gpytorch.priors.GammaPrior
+          concentration: 2.0
+          rate: 1.0
+- _target_: gpytorch.kernels.IndexKernel
+  num_tasks: ${num_categories}
+  active_dims: ${idx_categorical}
+  rank: 1
