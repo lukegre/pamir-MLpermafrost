@@ -74,16 +74,18 @@ def main(cfg):
         # rq_lengthscales = get_rbf_lengthscales(model, cfg.features, kernel_trace='covar_module.kernels.0.kernels.1.base_kernel')
         # mlflow.log_dict(rq_lengthscales, "rq_lengthscales_trained.json")
 
-        output = inference(
-            model,
-            scaler_X,
-            scaler_y,
-            cfg,
-            # isel_subset={"y": slice(2800, 3300), "x": slice(1400, 2500)},
-        )
-
-        plot_results(output)
-        log_netcdf(output, cfg)
+        if cfg.get('plot_map', True) or cfg.get('write_netcdf'):
+            output = inference(
+                model,
+                scaler_X,
+                scaler_y,
+                cfg,
+                # isel_subset={"y": slice(2800, 3300), "x": slice(1400, 2500)},
+            )
+            if cfg.plot_map:
+                plot_results(output)
+            if cfg.write_netcdf:
+                log_netcdf(output, cfg)
 
 
 def load_training_data(cfg):
@@ -204,7 +206,7 @@ def fig_to_pilimage(fig):
     from PIL import Image
 
     buf = BytesIO()
-    fig.savefig(buf, format='png')
+    fig.savefig(buf, format='png', transparent=True, bbox_inches='tight')
     buf.seek(0)
     img = Image.open(buf)
     return img

@@ -11,8 +11,11 @@ env:  ## sets everything up when running on a renkulab session
 	@pip3 install uv
 	@uv sync
 
-mlfow-ui: env  ## runs an mlflow ui server ensuring that env is set up
-	@uv run mlflow ui
+mlflow-ui: env  ## runs an mlflow ui server ensuring that env is set up
+	uv run mlflow ui
+
+renku-tunnel:  ## opens a tunnel from the renkulab session
+	@bash src/start_tunnel.sh
 
 jupyter-kernel:  ## creates a jupyter-notebook kernel for this project
 	@uv sync

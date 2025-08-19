@@ -76,9 +76,13 @@ def get_hash(text: str) -> str:
     hash_object = hashlib.sha1(text.encode())
     return hash_object.hexdigest()[:8]  # Return the first 8 characters
 
+def get_list_len(items: list) -> int:
+    return len(items)
+
 
 cs = ConfigStore.instance()
 cs.store(name="config", node=PamirConfig)
 
 OmegaConf.register_new_resolver("class_name", get_class_name, replace=True)
 OmegaConf.register_new_resolver("hash", get_hash, replace=True)
+OmegaConf.register_new_resolver("list_len", get_list_len, replace=True)

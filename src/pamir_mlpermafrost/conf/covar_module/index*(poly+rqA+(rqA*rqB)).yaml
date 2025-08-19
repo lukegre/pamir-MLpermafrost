@@ -12,13 +12,22 @@ _args_:
       _target_: gpytorch.priors.NormalPrior
       loc: 0.0
       scale: 1.0
+  - _target_: gpytorch.kernels.ScaleKernel
+    base_kernel:
+      _target_: gpytorch.kernels.RQKernel
+      active_dims: ${idx_1}
+      ard_num_dims: ${list_len:${idx_1}}
+      lengthscale_prior:
+        _target_: gpytorch.priors.GammaPrior
+        concentration: 2.0
+        rate: 1.0
   - _target_: gpytorch.kernels.ProductKernel
     _args_:
     - _target_: gpytorch.kernels.ScaleKernel
       base_kernel:
         _target_: gpytorch.kernels.RQKernel
         active_dims: ${idx_1}
-        ard_num_dims: ${num_1}
+        ard_num_dims: ${list_len:${idx_1}}
         lengthscale_prior:
           _target_: gpytorch.priors.GammaPrior
           concentration: 2.0
@@ -27,6 +36,7 @@ _args_:
       base_kernel:
         _target_: gpytorch.kernels.RQKernel
         active_dims: ${idx_2}
+        # ard_num_dims: ${list_len:${idx_2}}
         lengthscale_prior:
           _target_: gpytorch.priors.GammaPrior
           concentration: 2.0

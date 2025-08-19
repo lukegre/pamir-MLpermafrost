@@ -10,4 +10,4 @@
 **What I've learnt**: Taking the product of RQ(core) / RQ(temp_precip) is important, otherwise low scores. Best combination is: 
 $$\textbf{Index}\cdot(\textbf{Poly}[temp,alt] + \textbf{RQ}[core] \cdot \textbf{RQ}[T,P])$$ 
 where RQ(precip/temp) does not have independent length scales (ARD). Using more combinations doesn't improve scores (both in test and mapped), but not splitting these and keeping everything under the same kernel ($RQ[core,T,P]$) results in poor estimates when compared to mapped results. 
-Why could this be? We're forcing lengthscales of T,P to be the same. This might actually improve results since these are coarse data. While *core* contains variables that differen on different lengthscales
+Why could this be? We're forcing lengthscales of T,P to be the same. This might actually improve results since these are coarse data. While *core* contains variables that differen on different lengthscales. 
