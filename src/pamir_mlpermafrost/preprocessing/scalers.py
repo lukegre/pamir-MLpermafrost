@@ -60,7 +60,10 @@ class StandardScaler_toTensor(StandardScaler):
         return torch.tensor(X_scaled, dtype=torch.float32, device="cpu")
 
     def inverse_transform(self, X_scaled_tensor):
-        X_scaled = X_scaled_tensor.cpu().numpy()
+        if isinstance(X_scaled_tensor, torch.Tensor):
+            X_scaled = X_scaled_tensor.cpu().numpy()
+        else: 
+            X_scaled = X_scaled_tensor
         X_original = super(StandardScaler_toTensor, self).inverse_transform(X_scaled)
 
         if isinstance(self.feature_names_in_, list):

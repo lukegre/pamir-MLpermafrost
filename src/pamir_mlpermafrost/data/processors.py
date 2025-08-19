@@ -41,17 +41,17 @@ def process_X(df: pd.DataFrame, features: tuple[str, ...]) -> pd.DataFrame:
 
 
 def process_Xy(
-    df: pd.DataFrame, features: tuple[str, ...], target: str
+    df: pd.DataFrame, features: tuple[str, ...], target: str|list[str]
 ) -> tuple[pd.DataFrame, pd.Series]:
-    df = df.dropna(subset=target)
+    if isinstance(target, str):
+        target = [target]
+
+    df = df.dropna(subset=target + list(features))
 
     train_X = process_X(df, features)
     train_y = df[target]
 
-    train_X = train_X.dropna()
-    train_y = train_y.loc[train_X.index]
-
-    m = (train_y != 0).values.ravel()  # remove zero values from target
+    m = (train_X != 0).values.any(axis=1)
     train_X = train_X[m]
     train_y = train_y[m]
 

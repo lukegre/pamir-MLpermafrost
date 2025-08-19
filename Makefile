@@ -21,5 +21,8 @@ jupyter-kernel:  ## creates a jupyter-notebook kernel for this project
 	@uv sync
 	@uv run ipython kernel install --user --env VIRTUAL_ENV $(pwd)/.venv --name=$(name)
 
+runs:  ## runs the hydra multirun script
+	@uv run bash notebooks/run-hydra-multirun.sh
+
 help:  ## show this help
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'

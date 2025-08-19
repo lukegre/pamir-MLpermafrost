@@ -76,7 +76,7 @@ class GPMixedMean(GPModel):
         return gpytorch.distributions.MultivariateNormal(mean_x, covar_x)
 
 
-class GPMixedMeanCatIndex(GPModel):
+class GPMixedMeanCatIndex(GPModel): 
     def __init__(self, train_x, train_y, likelihood, linear_mean_idx=[], cat_idx=[]):
         super().__init__(train_x, train_y, likelihood)
 
@@ -141,3 +141,31 @@ class GPCustomCovar(GPModel):
         covar_x = self.covar_module(x)
 
         return gpytorch.distributions.MultivariateNormal(mean_x, covar_x)
+
+
+class GPCustomCovarMultitask(GPModel):
+    def __init__(
+        self,
+        train_x,
+        train_y,
+        likelihood=DEFAULT_GaussianLikelihood,
+        covar_module=DEFAULT_RBFKernel,
+    ):
+        super().__init__(train_x, train_y, likelihood)
+
+        # constructing the mean modules
+        self.constant_mean = gpytorch.means.MultitaskMean(
+            gpytorch.means.ConstantMean(),
+            num_tasks=train_y.shape[-1]
+        )
+        self.covar_module = gpytorch.kernels.MultitaskKernel(
+            covar_module,
+            num_tasks=train_y.shape[-1],
+            rank=1,  # Use a low-rank approximation for multitask covariance
+        )
+
+    def forward(self, x):
+        mean_x = self.constant_mean(x)
+        covar_x = self.covar_module(x)
+
+        return gpytorch.distributions.MultitaskMultivariateNormal(mean_x, covar_x)

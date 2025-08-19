@@ -1,0 +1,91 @@
+defaults:
+- _self_
+- data: renkulab
+- preprocessing: default
+- scalers: standard_scaler_to_tensor
+- optimizer: adam
+- covar_module: index*(poly+rqA+(rqA*rqB))
+- likelihood: gaussian_interval_mutiltask
+- model: gp_multi_target
+
+experiment_name: split_rbf_kernels
+seed: 142
+device: cuda
+
+target: 
+- ground_tempJAS_025
+- ground_tempJAS_050
+- ground_tempJAS_075
+- ground_tempJAS_1
+- ground_tempJAS_1.5
+- ground_tempJAS_2
+- ground_tempJAS_3
+- ground_tempJAS_5
+- ground_tempJAS_7
+- ground_tempJAS_10
+- ground_tempJAS_15
+- ground_tempJAS_20
+- ground_tempJFM_025
+- ground_tempJFM_050
+- ground_tempJFM_075
+- ground_tempJFM_1
+- ground_tempJFM_1.5
+- ground_tempJFM_2
+- ground_tempJFM_3
+- ground_tempJFM_5
+- ground_tempJFM_7
+- ground_tempJFM_10
+- ground_tempJFM_15
+- ground_tempJFM_20
+
+features:
+- surface_index  # 0
+- altitude  # 1
+- slope_angle
+- aspect_sin
+- aspect_cos
+- albedo
+- emissivity
+- snow_melt_doy
+- temperature  # 8
+- temp2m_DJF_q05  # 9
+- temp2m_JJA_q05
+- temp2m_MAM_q05
+- temp2m_SON_q05
+- temp2m_DJF_q50
+- temp2m_JJA_q50
+- temp2m_MAM_q50
+- temp2m_SON_q50
+- temp2m_DJF_q95
+- temp2m_JJA_q95
+- temp2m_MAM_q95
+- temp2m_SON_q95
+- precip_DJF_q50  # 21
+- precip_JJA_q50
+- precip_MAM_q50
+- precip_SON_q50
+- precip_DJF_q95
+- precip_JJA_q95
+- precip_MAM_q95
+- precip_SON_q95  # 28
+
+idx_categorical: [ 0 ] # surface_index
+num_categories: 5
+index_kernel_rank: 1
+idx_poly: [ 1, 8 ] # altitude, temperature
+poly_power: 2
+idx_1: [ 1, 2, 3, 4, 5, 6, 7, 8]
+idx_2: [ 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27 ]
+
+train_test_split_function: pamir_mlpermafrost.preprocessing.splits.vert_horz_cross
+test_corner: upper left
+
+likelihood_noise_lower: 0.2
+likelihood_noise_upper: 5.0
+
+learning_rate: 0.03
+
+plot_map: true
+write_netcdf: false
+
+run_dir: ${hydra:runtime.output_dir}

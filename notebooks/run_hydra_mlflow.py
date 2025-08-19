@@ -21,7 +21,7 @@ warnings.filterwarnings(
 
 PLOT_VARS = {
     "yhat_avg": dict(cmap="RdBu_r", vmin=-10, vmax=10),
-    "yhat_std": dict(vmin=0, vmax=3.5),
+    "yhat_std": dict(vmin=0, vmax=4.5),
     # "temperature": dict(robust=True, cmap="RdBu_r", center=273.15),
     # "altitude": dict(robust=True, cmap="terrain"),
     # "aspect": dict(cmap="twilight_r"),
@@ -66,6 +66,7 @@ def main(cfg):
             patience=10,
             tolerance=1e-3,
         )
+
         scores = evaluate_model(model, train_X, train_y, test_X, test_y, scaler_y)
 
         torch.save(model.state_dict(), output_dir / "model_state.pt")
@@ -94,6 +95,7 @@ def load_training_data(cfg):
     """
     # Load the training data
     data = cfg.data.training.load().loc[["S180_exp4", "N180_exp4"]]
+    data = data.reset_index().set_index(["y", "x"])
 
     # Preprocess the data
     data_X, data_y = cfg.preprocessing.training(data)
@@ -102,6 +104,8 @@ def load_training_data(cfg):
     train_X, test_X, train_y, test_y = cfg.preprocessing.train_test_split(
         data_X, data_y
     )
+
+    plot_train_test_split(train_X, test_X)
 
     # Scale the features and target variable
     scaler_X = cfg.scalers.features.fit(train_X)
@@ -176,22 +180,52 @@ def inference(
     return out
 
 
+def _get_figsize(x: pd.Series|xr.DataArray, y: pd.Series|xr.DataArray, fig_w: float = 10):
+    """
+    Calculate figure size based on the aspect ratio of the data.
+    """
+    pixel_aspect = 1 / np.cos(np.deg2rad(float(y.mean())))
+    fig_aspect = pixel_aspect * 1.1
+    fig_h = fig_w / fig_aspect
+    return fig_w, fig_h
+
+
+def plot_train_test_split(
+    train_X: pd.DataFrame,
+    test_X: pd.DataFrame,):
+
+    len_train = len(train_X)
+    len_test = len(test_X)
+
+    coords_train = train_X.index.to_frame()
+    coords_test = test_X.index.to_frame()
+    coords = pd.concat([coords_train, coords_test])
+
+    figsize = _get_figsize(coords['x'], coords['y'])
+
+    fig, axs = plt.subplots(figsize=figsize, dpi=150)
+    coords_train.plot(x='x', y='y', kind='scatter', c='b', ax=axs, label=f'Train (n={len_train})')
+    coords_test.plot(x='x', y='y', kind='scatter', c='r', ax=axs, label=f'Test (n={len_test})')
+
+    frac = len_test / (len_train + len_test)
+    axs.set_title(f"Train/Test Split (Test Size: {frac:.2f})")
+    axs.legend()
+
+    fig.tight_layout()
+    image = fig_to_pilimage(fig)
+    mlflow.log_image(image, key='train_test_split', step=0)
+
+
 def plot_results(ds):
-    
-    mlflow.tracking.multimedia.COMPRESSED_IMAGE_SIZE = 512
 
     mask = ds.surface_index > 0
-
-    pixel_aspect = 1 / np.cos(np.deg2rad(ds.y.mean().item()))
-    fig_aspect = pixel_aspect * 1.1
-    fig_w = 10
-    fig_h = fig_w / fig_aspect
+    figsize = _get_figsize(ds.x, ds.y, fig_w=10)
 
     for i, key in enumerate(PLOT_VARS.keys()):
         da = ds[key].where(mask)
         props = PLOT_VARS[key]
-        
-        fig, axs = plt.subplots(figsize=(fig_w, fig_h), dpi=150)
+
+        fig, axs = plt.subplots(figsize=figsize, dpi=150)
         da.plot.imshow(ax=axs, **props)
         fig.tight_layout()
         image = fig_to_pilimage(fig)

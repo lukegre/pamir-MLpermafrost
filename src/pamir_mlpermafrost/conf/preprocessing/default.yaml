@@ -1,8 +1,9 @@
 train_test_split:
-  _target_: sklearn.model_selection.train_test_split
+  _target_: ${train_test_split_function}
   _partial_: true
   test_size: 0.2
   random_state: ${seed}
+  loc: ${test_corner}
   shuffle: true
   stratify: null
 

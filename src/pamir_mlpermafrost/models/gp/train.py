@@ -37,6 +37,7 @@ def train_mll(
 
     mll = gpytorch.mlls.ExactMarginalLogLikelihood(likelihood, model)
 
+    print(y_train_scaled_tensor.shape)
     losses = []
     for i in range(n_iters):
         optimizer.zero_grad()

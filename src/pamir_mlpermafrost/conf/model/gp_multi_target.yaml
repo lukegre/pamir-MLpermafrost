@@ -1,0 +1,2 @@
+_target_: pamir_mlpermafrost.models.gp.models.GPCustomCovarMultitask
+_partial_: true

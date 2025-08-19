@@ -44,4 +44,4 @@ _args_:
 - _target_: gpytorch.kernels.IndexKernel
   num_tasks: ${num_categories}
   active_dims: ${idx_categorical}
-  rank: 1
+  rank: ${index_kernel_rank}

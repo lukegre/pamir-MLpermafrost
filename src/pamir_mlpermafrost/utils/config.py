@@ -1,3 +1,4 @@
+from pathlib import Path
 import hydra
 import munch
 from omegaconf import OmegaConf
@@ -17,7 +18,9 @@ class MunchRich(munch.Munch):
             yield key, value
 
 
-def load_hydra_config(config_dir: str, config_name: str, overrides=[]) -> munch.Munch:
+def load_hydra_config(config_dir: str|Path, config_name: str, overrides=[]) -> munch.Munch:
+    config_dir = str(Path(config_dir).absolute())
+
     with hydra.initialize_config_dir(
         config_dir=config_dir, version_base=None, job_name="notebook"
     ):
@@ -25,7 +28,7 @@ def load_hydra_config(config_dir: str, config_name: str, overrides=[]) -> munch.
 
     if in_jupyter_notebook():
         logger.warning('Will pop `run_dir` since detected in Notebook and cant be resolved')
-        params.__dict__['_content'].pop('run_dir')
+        params.__dict__['_content'].pop('run_dir', None)
         
     params = OmegaConf.to_container(params, resolve=True)
     params = hydra.utils.instantiate(params)
