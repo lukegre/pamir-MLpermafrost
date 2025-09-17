@@ -2,7 +2,7 @@ training:
   load:
     _target_: pandas.read_parquet
     _partial_: true
-    path: s3://spi-pamir-cryogrid/pamir-MLpermafrost/data-training/training_data-k1500-pamir_ns180-expX-ground_temp_seas_depth.parquet
+    path: s3://spi-pamir-cryogrid/pamir-MLpermafrost/data-training/training_data-k1500-pamir_N180-era5PCA.parquet
     engine: pyarrow
     storage_options:
       s3: 
@@ -10,9 +10,9 @@ training:
 
 inference:
   load:
-    _target_: xarray.open_zarr
+    _target_: dask.dataframe.read_parquet
     _partial_: true
-    store: s3://spi-pamir-cryogrid/pamir-MLpermafrost/data-inference/inference_variables-710w365s750e400n-100m.zarr/
+    path: s3://spi-pamir-cryogrid/pamir-MLpermafrost/data-inference/inference_data-pamir_N180-matching_names-v20250916.parquet/
     storage_options:
       s3: 
         endpoint_url: https://os.zhdk.cloud.switch.ch
