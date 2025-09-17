@@ -21,3 +21,4 @@ notebooks/experiments
 hydra/
 mlruns/
 multirun/
+*.png
