@@ -27,10 +27,10 @@ target:
 # - ground_temp_JFM_18m
 # - ground_temp_JAS_01m
 # - ground_temp_JAS_03m
-- ground_temp_JAS_05m
+# - ground_temp_JAS_05m
 # - ground_temp_JAS_07m
 # - ground_temp_JAS_1m
-# - ground_temp_JAS_2m
+- ground_temp_JAS_2m
 # - ground_temp_JAS_3m
 # - ground_temp_JAS_5m
 # - ground_temp_JAS_7m

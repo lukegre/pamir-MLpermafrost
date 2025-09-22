@@ -22,3 +22,8 @@ hydra/
 mlruns/
 multirun/
 *.png
+*.zarr
+*.png
+*.csv
+*.html
+*pkl
