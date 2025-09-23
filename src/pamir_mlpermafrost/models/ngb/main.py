@@ -36,7 +36,8 @@ def load_training_data(cfg):
     
     # Preprocess the data
     data_X, data_y = cfg.preprocessing.training(data)
-    data_y = data_y.iloc[:, 0]
+    if data_y.shape[1] == 1:
+        data_y = data_y.iloc[:, 0]
     
     # Split the data into training and testing sets
     train_X, test_X, train_y, test_y = cfg.preprocessing.train_test_split(

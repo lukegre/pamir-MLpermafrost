@@ -32,7 +32,28 @@ def tune_with_cv(train_X, train_y, n_folds=N_FOLDS_DEFAULT):
 
     return best_model, ds
 
+
+def make_models_multi(param_list):
+    import ngboost
     
+    models = []
+    for params in param_list:
+        models += ngboost.NGBRegressor(
+            Dist=ngboost.distns.MultivariateNormal,
+            Base=ngboost.learners.DecisionTreeRegressor(
+                criterion='friedman_mse',
+                splitter='random',
+                ccp_alpha=params['ccp_alpha'],
+                max_depth=params['max_depth'],
+                min_samples_leaf=params['min_samples_leaf']), 
+            n_estimators=5_000, 
+            verbose_eval=False, 
+            early_stopping_rounds=5,
+            learning_rate=params.get('learning_rate', 0.01)),
+
+    return models
+
+
 def make_models(param_list):
     import ngboost
     

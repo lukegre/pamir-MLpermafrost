@@ -1,0 +1,74 @@
+defaults:
+- _self_
+- data: renkulab
+- preprocessing: default
+- scalers: standard_scaler_to_tensor
+- optimizer: adam
+- covar_module: index(poly+rq)
+- likelihood: gaussian_interval_mutiltask
+- model: gp_multi_target
+
+experiment_name: split_rbf_kernels
+seed: 142
+device: cpu
+
+target: 
+# - ground_temp_JFM_01m
+# - ground_temp_JFM_03m
+# - ground_temp_JFM_05m
+# - ground_temp_JFM_07m
+# - ground_temp_JFM_1m
+# - ground_temp_JFM_2m
+# - ground_temp_JFM_3m
+# - ground_temp_JFM_5m
+# - ground_temp_JFM_7m
+# - ground_temp_JFM_10m
+# - ground_temp_JFM_14m
+# - ground_temp_JFM_18m
+- ground_temp_JAS_01m
+- ground_temp_JAS_03m
+- ground_temp_JAS_05m
+- ground_temp_JAS_07m
+- ground_temp_JAS_1m
+- ground_temp_JAS_2m
+- ground_temp_JAS_3m
+- ground_temp_JAS_5m
+- ground_temp_JAS_7m
+- ground_temp_JAS_10m
+- ground_temp_JAS_14m
+- ground_temp_JAS_18m
+
+features:
+- surface_index  # 0
+- altitude  # 1
+- slope_angle
+- aspect_sin
+- aspect_cos
+- albedo
+- emissivity
+- snow_melt_doy
+- era5_temp2m_precip_PC1  # 8
+- era5_temp2m_precip_PC2
+- era5_temp2m_precip_PC3
+- era5_temp2m_precip_PC4
+- era5_temp2m_precip_PC5  # 12
+
+idx_categorical: [ 0 ] # stratigraphy_index
+num_categories: 5
+index_kernel_rank: 1
+idx_poly: [ 1, 8 ] # altitude, temperature
+poly_power: 2
+idx_1: [ 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12 ]
+
+train_test_split_function: pamir_mlpermafrost.preprocessing.splits.vert_horz_cross
+test_corner: upper left
+
+likelihood_noise_lower: 0.2
+likelihood_noise_upper: 5.0
+
+learning_rate: 0.03
+
+plot_map: true
+write_netcdf: false
+
+run_dir: ${hydra:runtime.output_dir}
