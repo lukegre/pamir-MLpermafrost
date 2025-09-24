@@ -8,9 +8,10 @@ authors = [
 ]
 requires-python = ">=3.12"
 dependencies = [
+    "boto3>=1.39.8",
     "bottleneck>=1.6.0",
     "cryogrid-pytools>=0.3.18",
-    "dask>=2025.7.0",
+    "dask[distributed]>=2025.7.0",
     "geopandas>=1.1.1",
     "gpytorch>=1.14",
     "h5netcdf>=1.6.4",
